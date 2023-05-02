@@ -73,7 +73,7 @@ plot_df02 = df_consumption.loc[(df_consumption['year'] >= year_min) &
                                 (df_consumption['year'] <= year_max)]
 
 # group filtered df 02 by country and mean
-plot_df03 = plot_df02.groupby('country', as_index=False).mean()
+plot_df03 = plot_df02.groupby(['country', 'iso_code'], as_index=False).mean()
 
 # Total energy by country by Year
 st.sidebar.subheader('Total Energy by Country per Capita by Year')
