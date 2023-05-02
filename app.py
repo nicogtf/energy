@@ -60,7 +60,7 @@ df_consumption = df[[*main_cols, *consumption_type_cols]]
 # df_consumption[consumption_type_cols] *= 10e9
 # df_consumption
 df_consumption = df_consumption.assign(total_energy_consumption = df_consumption.loc[:, consumption_type_cols].sum(axis=1))
-df_consumption['total_energy_consumption'] = df['primary_energy_consumption']
+# df_consumption['total_energy_consumption'] = df['primary_energy_consumption']
 
 # df_consumption
 
