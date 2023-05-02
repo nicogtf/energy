@@ -45,12 +45,24 @@ for item in ['fossil_fuel_consumption', 'low_carbon_consumption', 'other_renewab
                         'primary_energy_consumption', 'renewables_consumption']:
     consumption_type_cols.remove(item)
     
+    
+# # attempt with different columns (otherwise too many countries are at zero)
+# consumption_type_cols = ['fossil_fuel_consumption', 'low_carbon_consumption', 'other_renewable_consumption', 
+#                         'primary_energy_consumption', 'renewables_consumption']
+
+# # let's remove primary_energy_consumption
+# consumption_type_cols = ['fossil_fuel_consumption', 'low_carbon_consumption', 'other_renewable_consumption', 
+#                         'renewables_consumption']
+    
 df_consumption = df[[*main_cols, *consumption_type_cols]]
 # df_consumption
 # # convert energy from terawatt-hour to kWatt-hour
 # df_consumption[consumption_type_cols] *= 10e9
 # df_consumption
 df_consumption = df_consumption.assign(total_energy_consumption = df_consumption.loc[:, consumption_type_cols].sum(axis=1))
+df_consumption['total_energy_consumption'] = df['primary_energy_consumption']
+
+# df_consumption
 
 # streamlit setup
 st.header('World Energy Consumption')
@@ -102,29 +114,7 @@ if not st.sidebar.checkbox('Hide', False, key='checkbox01'):
     )
     st.plotly_chart(fig01)
     
-# Population vs GDP
-st.sidebar.subheader('Population vs GDP')
-if not st.sidebar.checkbox('Hide', False, key='checkbox02'):
-    st.subheader('Population vs GDP')
 
-    fig02 = px.scatter(plot_df03,
-                       x='gdp',
-                       y='population',
-                       hover_name='country')
-    
-    st.plotly_chart(fig02)
-    
-# Population vs Total Energy Consumption
-st.sidebar.subheader('Population vs Total Energy Consumption')
-if not st.sidebar.checkbox('Hide', False, key='checkbox03'):
-    st.subheader('Population vs Total Energy Consumption')
-    
-    fig03 = px.scatter(plot_df03,
-                       x='total_energy_consumption',
-                       y='population',
-                       hover_name='country')
-    
-    st.plotly_chart(fig03)
     
 # Average energy by country per Capita
 st.sidebar.subheader('Average Energy by Country per Capita')
@@ -246,5 +236,46 @@ if not st.sidebar.checkbox('Hide', False, key='checkbox07'):
     
     
     st.plotly_chart(fig07)
+    
+# Map
+st.sidebar.subheader('Global Energy Consumption Map')
+if not st.sidebar.checkbox('Hide', False, key='checkbox08'):
+    st.subheader('Global Energy Consumption Map')
+
+
+
+    fig08 = px.scatter_geo(df_consumption, locations="iso_code", 
+    #                        color="continent",
+                         hover_name="country", size="total_energy_consumption",
+                         projection="natural earth")  
+    
+    st.plotly_chart(fig08)
+    
+    
+    
+    
+# Population vs GDP
+st.sidebar.subheader('Population vs GDP')
+if not st.sidebar.checkbox('Hide', False, key='checkbox02'):
+    st.subheader('Population vs GDP')
+
+    fig02 = px.scatter(plot_df03,
+                       x='gdp',
+                       y='population',
+                       hover_name='country')
+    
+    st.plotly_chart(fig02)
+    
+# Population vs Total Energy Consumption
+st.sidebar.subheader('Population vs Total Energy Consumption')
+if not st.sidebar.checkbox('Hide', False, key='checkbox03'):
+    st.subheader('Population vs Total Energy Consumption')
+    
+    fig03 = px.scatter(plot_df03,
+                       x='total_energy_consumption',
+                       y='population',
+                       hover_name='country')
+    
+    st.plotly_chart(fig03)
     
     
