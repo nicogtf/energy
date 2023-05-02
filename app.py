@@ -8,6 +8,7 @@ Created on Tue May  2 06:20:47 2023
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import numpy as np
 
 url = 'https://raw.githubusercontent.com/owid/energy-data/master/owid-energy-data.csv'
 
@@ -57,16 +58,22 @@ st.markdown('https://github.com/owid/energy-data/blob/master/owid-energy-codeboo
 st.sidebar.header('Plots Options') 
 min_value=min(df_consumption['year'])
 max_value=max(df_consumption['year'])
-value = (min_value, max_value)
+value = (1965, max_value)
 year_min, year_max = st.sidebar.slider('Year', min_value, max_value, value)
-country = st.sidebar.multiselect('Select countries', 
-                                 df_consumption['country'].unique(),
-                                 default='United States')
+
+list_countries = df_consumption['country'].unique()
+default_countries = df_consumption.groupby(['country', 'iso_code'], as_index=False).sum().sort_values(by='gdp', ascending=False)['country'][:12]
+country_select = st.sidebar.multiselect('Select countries', 
+                                 np.insert(list_countries, 0, 'Select All'),
+                                 default=default_countries)
+
+if 'Select All' in country_select:
+    country_select = list_countries
 
 # filter df by years and countries
 plot_df01 = df_consumption.loc[(df_consumption['year'] >= year_min) &
                                 (df_consumption['year'] <= year_max) &
-                                (df_consumption['country'].isin(country))]
+                                (df_consumption['country'].isin(country_select))]
 
 # filter df by years
 plot_df02 = df_consumption.loc[(df_consumption['year'] >= year_min) &
@@ -206,9 +213,8 @@ if not st.sidebar.checkbox('Hide', False, key='checkbox05'):
 st.sidebar.subheader('Global Energy Consumption by Type and Year')
 if not st.sidebar.checkbox('Hide', False, key='checkbox06'):
     st.subheader('Global Energy Consumption by Type and Year')
-    nl = '\n'
-    st.markdown("Global energy consumption of:")
-    st.markdown(f"   {', '.join(country)}")
+    st.markdown("Global energy consumption of selected countries:")
+    st.markdown(f"   {', '.join(country_select[:10])}...")
     st.markdown(f" between {year_min} and {year_max} by type of energy")
    
 
@@ -226,3 +232,19 @@ if not st.sidebar.checkbox('Hide', False, key='checkbox06'):
     )
     
     st.plotly_chart(fig06)
+    
+# Global Energy Consumption by Type
+st.sidebar.subheader('Global Percentage Energy Consumption by Type')
+if not st.sidebar.checkbox('Hide', False, key='checkbox07'):
+    st.subheader('Global Percentage Energy Consumption by Type')
+    st.markdown("Global energy consumption of selected countries:")
+    st.markdown(f"   {', '.join(country_select[:10])}...")
+    st.markdown(f" between {year_min} and {year_max} by type of energy")
+    
+    fig07 = px.pie(plot_df01, values=plot_df01[consumption_type_cols].sum(axis=0), 
+                   names=consumption_type_cols)
+    
+    
+    st.plotly_chart(fig07)
+    
+    
